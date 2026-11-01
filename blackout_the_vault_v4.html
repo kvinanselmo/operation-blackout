@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACKOUT // THE VAULT</title>
+<style>
+:root{
+  --bg:#050607;--panel:#0b0d10;--line:#252a31;--text:#f4f5f2;
+  --muted:#7d838c;--accent:#d9ff3f;--red:#ff5d5d;--green:#74ffb0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;
+background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:40px 40px}
+button,input{font:inherit}.hidden{display:none!important}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+.wrap{width:min(960px,100%)}.hero{text-align:center}
+.kicker{font-size:10px;letter-spacing:.32em;color:var(--accent);font-weight:900}
+.logo{font-size:clamp(58px,13vw,130px);font-weight:950;letter-spacing:-.09em;line-height:.82;margin:18px 0 14px}
+.subtitle{color:var(--muted);font-size:12px;letter-spacing:.22em}
+.boot{margin:42px auto 0;width:min(480px,100%);text-align:left}
+.bootline{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#9ba1aa;margin:9px 0}
+.bootline b{color:var(--green);font-weight:600}
+.enter,.primary,.secondary,.submit{cursor:pointer}
+.enter{margin-top:34px;width:100%;padding:17px;border:1px solid var(--accent);background:var(--accent);
+color:#050607;border-radius:10px;font-weight:950;letter-spacing:.2em}
+.enter:hover,.primary:hover,.submit:hover{filter:brightness(1.08)}
+.panel{background:linear-gradient(145deg,rgba(16,19,24,.98),rgba(8,10,13,.98));
+border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.header{padding:24px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;
+gap:18px;align-items:center}.brand{font-size:18px;font-weight:950;letter-spacing:-.04em}.brand span{color:var(--accent)}
+.badge{font-size:10px;letter-spacing:.16em;color:var(--muted);border:1px solid var(--line);padding:9px 12px;border-radius:999px}
+.content{padding:28px}.title{font-size:clamp(28px,5vw,46px);letter-spacing:-.045em;margin:9px 0 10px}
+.desc{color:#9da3ab;line-height:1.65;max-width:760px;margin:0}
+.desc strong{color:var(--text)}
+.progressWrap{margin:26px 0}.progressMeta{display:flex;justify-content:space-between;color:#7f8690;
+font-size:10px;letter-spacing:.16em;font-weight:800}.progress{height:7px;background:#171a1f;border-radius:999px;overflow:hidden;margin-top:9px}
+.bar{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mission{border:1px solid var(--line);border-radius:15px;padding:17px;background:#090b0e;min-height:190px;
+display:flex;flex-direction:column;justify-content:space-between}
+.mission.accepted{border-color:#425b2a;background:linear-gradient(145deg,#0c110b,#090b0e)}
+.mnum{font:9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;color:#666d77}
+.mname{font-weight:900;font-size:18px;margin-top:6px}
+.mnote{color:#707781;font-size:10px;line-height:1.55;margin-top:12px}
+.inputRow{display:flex;gap:8px;margin-top:14px}
+.fragmentInput{width:72px;height:46px;border:1px solid #30363e;border-radius:9px;background:#050607;
+color:var(--accent);font:900 21px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;
+text-transform:uppercase;outline:none}
+.fragmentInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,255,63,.08)}
+.fragmentInput:disabled{opacity:.6}
+.submit{flex:1;border:1px solid var(--line);background:#0d1014;color:#b8bec6;border-radius:9px;
+font-size:9px;font-weight:900;letter-spacing:.12em}
+.submit:disabled{cursor:default;opacity:.65}
+.mstatus{font-size:9px;letter-spacing:.14em;color:#6f7680;margin-top:12px}
+.mstatus.good{color:var(--green)}
+.section{margin-top:28px}.terminal{margin-top:11px;border:1px solid #30363e;border-radius:18px;background:#07090b;padding:20px}
+.terminalLabel{display:flex;justify-content:space-between;gap:12px;color:#7f8690;font-size:9px;letter-spacing:.18em;font-weight:900}
+.terminalStatus{color:#777d87}.terminalStatus.good{color:var(--green)}
+#finalInput{display:block;width:100%;margin-top:16px;padding:18px 16px;border:1px solid #30363e;border-radius:11px;
+background:#050607;color:var(--accent);font:900 30px ui-monospace,SFMono-Regular,Menlo,monospace;
+letter-spacing:.28em;text-align:center;outline:none;text-transform:uppercase}
+#finalInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,255,63,.08)}
+#finalInput:disabled{opacity:.5}
+.hint{color:#656c76;font-size:10px;line-height:1.5;margin-top:10px;text-align:center}
+.actions{display:flex;gap:10px;margin-top:14px}.primary,.secondary{flex:1;padding:13px 15px;border-radius:10px;
+font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);background:var(--accent);color:#050607}
+.secondary{border:1px solid var(--line);background:#0c0f12;color:#aab0b8}
+.vault{margin-top:18px;border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center;background:#080a0d}
+.vicon{font-size:40px;margin-bottom:8px}.vstate{font-size:20px;font-weight:950;letter-spacing:.08em}
+.vsub{color:#737a84;font-size:11px;margin-top:7px;line-height:1.5}
+.message{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.12em;margin:14px 0}
+.shake{animation:shake .32s linear}.flash{animation:flash .7s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+@keyframes flash{0%{box-shadow:0 30px 90px rgba(0,0,0,.55)}35%{box-shadow:0 0 0 2px rgba(116,255,176,.25),0 0 50px rgba(116,255,176,.16)}100%{box-shadow:0 30px 90px rgba(0,0,0,.55)}}
+@media(max-width:650px){
+.screen{padding:14px}.content{padding:20px}.header{padding:18px}.grid{grid-template-columns:1fr}
+.actions{flex-direction:column}.logo{font-size:62px}.subtitle{font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<section class="screen" id="intro">
+  <div class="wrap hero">
+    <div class="kicker">OPERATION BLACKOUT</div>
+    <div class="logo">THE VAULT</div>
+    <div class="subtitle">SIX GAMES // SIX FRAGMENTS // ONE FINAL CODE</div>
+    <div class="boot">
+      <div class="bootline">SYSTEM <b>ONLINE</b></div>
+      <div class="bootline">VAULT STATUS <b>LOCKED</b></div>
+      <div class="bootline">FRAGMENTS <b>6</b></div>
+      <div class="bootline">FINAL TERMINAL <b>READY</b></div>
+      <button class="enter" id="beginBtn" type="button">BEGIN OPERATION</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen hidden" id="game">
+  <div class="wrap">
+    <div class="panel" id="panel">
+      <div class="header">
+        <div class="brand">BLACKOUT <span>//</span> THE VAULT</div>
+        <div class="badge" id="status">VAULT LOCKED</div>
+      </div>
+
+      <div class="content">
+        <div class="kicker">MISSION CONTROL</div>
+        <h1 class="title">Earn the fragments.</h1>
+        <p class="desc">
+          Selesaikan setiap game. Setelah mendapatkan hasilnya, masukkan <strong>1 karakter kode</strong>
+          yang kalian dapat ke kolom game tersebut. Website <strong>tidak akan memberi tahu jawabannya di awal</strong>.
+        </p>
+
+        <div class="progressWrap">
+          <div class="progressMeta"><span>FRAGMENTS VERIFIED</span><span id="progressText">0 / 6</span></div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+        </div>
+
+        <div class="grid" id="missions"></div>
+
+        <div class="section">
+          <div class="kicker">FINAL CODE TERMINAL</div>
+          <div class="terminal">
+            <div class="terminalLabel">
+              <span>ONE BOX // FINAL ORDER</span>
+              <span class="terminalStatus" id="terminalStatus">LOCKED</span>
+            </div>
+            <input id="finalInput" maxlength="6" autocomplete="off" spellcheck="false"
+                   placeholder="••••••" aria-label="Final vault code" disabled>
+            <div class="hint">Setelah keenam fragment terverifikasi, susun semuanya menjadi satu kode dan masukkan di sini.</div>
+          </div>
+          <div class="message" id="message">Complete all six games first.</div>
+          <div class="actions">
+            <button class="primary" id="unlockBtn" type="button" disabled>UNLOCK VAULT</button>
+            <button class="secondary" id="resetBtn" type="button">RESET</button>
+          </div>
+        </div>
+
+        <div class="vault" id="vault">
+          <div class="vicon" id="vicon">🔒</div>
+          <div class="vstate" id="vstate">VAULT LOCKED</div>
+          <div class="vsub" id="vsub">Six games. Six fragments. One final answer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+
+  /*
+    The actual answers are intentionally NOT rendered anywhere on the page.
+    Expected fragments, by game:
+    1=4, 2=L, 3=1, 4=Y, 5=F, 6=M
+    Final code: F4M1LY
+  */
+
+  const GAME_NAMES = [
+    "THE PROFILE",
+    "CHEMISTRY",
+    "THE MEMORY",
+    "THE CODE",
+    "THE EXTRACTION",
+    "THE FINAL"
+  ];
+
+  const GAME_NOTES = [
+    "Enter the character awarded after this game.",
+    "Enter the character awarded after this game.",
+    "Enter the character awarded after this game.",
+    "Enter the character awarded after this game.",
+    "Enter the character awarded after this game.",
+    "Enter the character awarded after this game."
+  ];
+
+  // Obfuscated from the visible UI; these are the six accepted fragments.
+  const EXPECTED = ["4","L","1","Y","F","M"];
+  const FINAL_CODE = "F4M1LY";
+
+  const intro = document.getElementById("intro");
+  const game = document.getElementById("game");
+  const panel = document.getElementById("panel");
+  const missions = document.getElementById("missions");
+  const progressText = document.getElementById("progressText");
+  const bar = document.getElementById("bar");
+  const finalInput = document.getElementById("finalInput");
+  const unlockBtn = document.getElementById("unlockBtn");
+  const message = document.getElementById("message");
+  const terminalStatus = document.getElementById("terminalStatus");
+  const status = document.getElementById("status");
+  const vicon = document.getElementById("vicon");
+  const vstate = document.getElementById("vstate");
+  const vsub = document.getElementById("vsub");
+
+  const accepted = Array(6).fill(false);
+
+  function buildGames(){
+    missions.innerHTML = "";
+    GAME_NAMES.forEach(function(name, i){
+      const card = document.createElement("div");
+      card.className = "mission";
+      card.dataset.game = String(i);
+      card.innerHTML =
+        '<div>' +
+          '<div class="mnum">GAME ' + String(i+1).padStart(2,"0") + '</div>' +
+          '<div class="mname">' + escapeHtml(name) + '</div>' +
+          '<div class="mnote">' + escapeHtml(GAME_NOTES[i]) + '</div>' +
+          '<div class="inputRow">' +
+            '<input class="fragmentInput" maxlength="1" autocomplete="off" spellcheck="false" aria-label="Code fragment for Game ' + (i+1) + '">' +
+            '<button class="submit" type="button">SUBMIT</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mstatus">AWAITING FRAGMENT</div>';
+
+      const input = card.querySelector(".fragmentInput");
+      const button = card.querySelector(".submit");
+
+      input.addEventListener("input", function(){
+        input.value = input.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,1);
+      });
+
+      input.addEventListener("keydown", function(event){
+        if(event.key === "Enter") submitFragment(i, card, input, button);
+      });
+
+      button.addEventListener("click", function(){
+        submitFragment(i, card, input, button);
+      });
+
+      missions.appendChild(card);
+    });
+  }
+
+  function submitFragment(i, card, input, button){
+    if(accepted[i]) return;
+
+    const value = input.value.toUpperCase();
+
+    if(value.length !== 1){
+      card.querySelector(".mstatus").textContent = "ENTER 1 CHARACTER";
+      card.querySelector(".mstatus").className = "mstatus";
+      return;
+    }
+
+    if(value === EXPECTED[i]){
+      accepted[i] = true;
+      card.classList.add("accepted");
+      input.disabled = true;
+      button.disabled = true;
+      button.textContent = "VERIFIED";
+      const st = card.querySelector(".mstatus");
+      st.textContent = "FRAGMENT VERIFIED";
+      st.className = "mstatus good";
+      updateProgress();
+    }else{
+      card.classList.remove("accepted");
+      const st = card.querySelector(".mstatus");
+      st.textContent = "ACCESS DENIED — CHECK YOUR RESULT";
+      st.className = "mstatus";
+      panel.classList.remove("shake");
+      void panel.offsetWidth;
+      panel.classList.add("shake");
+    }
+  }
+
+  function updateProgress(){
+    const count = accepted.filter(Boolean).length;
+    progressText.textContent = count + " / 6";
+    bar.style.width = (count / 6 * 100) + "%";
+
+    if(count === 6){
+      finalInput.disabled = false;
+      unlockBtn.disabled = false;
+      terminalStatus.textContent = "READY";
+      terminalStatus.className = "terminalStatus good";
+      message.textContent = "All fragments verified. Find the correct order.";
+      message.style.color = "var(--green)";
+      vsub.textContent = "THE FINAL TERMINAL IS NOW ACTIVE.";
+      finalInput.focus();
+    }
+  }
+
+  function verifyFinal(){
+    const value = finalInput.value.replace(/[^a-z0-9]/gi,"").toUpperCase();
+    finalInput.value = value.slice(0,6);
+
+    if(accepted.filter(Boolean).length < 6) return;
+
+    if(value === FINAL_CODE){
+      status.textContent = "ACCESS GRANTED";
+      status.style.color = "var(--green)";
+      terminalStatus.textContent = "VERIFIED";
+      finalInput.disabled = true;
+      unlockBtn.disabled = true;
+      message.textContent = "THE SIX FRAGMENTS BECAME ONE.";
+      message.style.color = "var(--green)";
+      vicon.textContent = "🔓";
+      vstate.textContent = "VAULT OPEN";
+      vstate.style.color = "var(--green)";
+      vsub.textContent = "ACCESS CODE ACCEPTED.";
+      panel.classList.remove("flash");
+      void panel.offsetWidth;
+      panel.classList.add("flash");
+    }else{
+      message.textContent = "ACCESS DENIED — WRONG ORDER.";
+      message.style.color = "var(--red)";
+      panel.classList.remove("shake");
+      void panel.offsetWidth;
+      panel.classList.add("shake");
+    }
+  }
+
+  function resetAll(){
+    accepted.fill(false);
+    status.textContent = "VAULT LOCKED";
+    status.style.color = "var(--muted)";
+    finalInput.value = "";
+    finalInput.disabled = true;
+    unlockBtn.disabled = true;
+    terminalStatus.textContent = "LOCKED";
+    terminalStatus.className = "terminalStatus";
+    message.textContent = "Complete all six games first.";
+    message.style.color = "var(--muted)";
+    vicon.textContent = "🔒";
+    vstate.textContent = "VAULT LOCKED";
+    vstate.style.color = "var(--text)";
+    vsub.textContent = "Six games. Six fragments. One final answer.";
+    progressText.textContent = "0 / 6";
+    bar.style.width = "0%";
+    buildGames();
+  }
+
+  function escapeHtml(value){
+    return value.replace(/[&<>"']/g, function(ch){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch];
+    });
+  }
+
+  document.getElementById("beginBtn").addEventListener("click", function(){
+    intro.classList.add("hidden");
+    game.classList.remove("hidden");
+    buildGames();
+  });
+
+  finalInput.addEventListener("input", function(){
+    finalInput.value = finalInput.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,6);
+  });
+  finalInput.addEventListener("keydown", function(event){
+    if(event.key === "Enter") verifyFinal();
+  });
+  unlockBtn.addEventListener("click", verifyFinal);
+  document.getElementById("resetBtn").addEventListener("click", resetAll);
+})();
+</script>
+</body>
+</html>
