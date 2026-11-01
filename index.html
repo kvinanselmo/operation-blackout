@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#050607">
 <title>BLACKOUT // THE VAULT</title>
 <style>
@@ -18,7 +18,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;
 background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
 linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:40px 40px}
 button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.screen{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:22px;overflow-x:hidden}
 .wrap{width:min(1080px,100%)}.hero{text-align:center}
 .kicker{font-size:10px;letter-spacing:.32em;color:var(--accent);font-weight:900}
 .logo{font-size:clamp(58px,13vw,130px);font-weight:950;letter-spacing:-.09em;line-height:.82;margin:18px 0 14px}
@@ -166,6 +166,108 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
 .agentCard{min-height:380px}.agentPhoto{height:280px}.authPhoto{min-height:270px;max-height:330px}.dossierPhoto{min-height:330px;max-height:390px}
 .dossierBody{padding:22px}.meta{grid-template-columns:1fr}.dossierActions{flex-direction:column}.actions{flex-direction:column}
 .logo{font-size:62px}.subtitle{font-size:9px}}
+
+/* MOBILE / IPHONE HARDENING */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{width:100%;min-width:0;overflow-x:hidden;}
+.screen{width:100%;min-width:0;}
+.wrap,.panel,.content,.header,.dossier,.dossierBody,.auth,.authContent,.secretMission,.secretUnlocked,.secretProgress,.secretTable,.recordSection{min-width:0;}
+@supports (height:100dvh){.screen{min-height:100dvh}.modalBox{max-height:calc(100dvh - 36px)}}
+
+@media(max-width:650px){
+  .screen{
+    align-items:flex-start;
+    justify-content:flex-start;
+    padding:calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+    overflow-x:hidden;
+  }
+  .wrap{width:100%;}
+  .panel{width:100%;border-radius:16px;}
+  .header{
+    padding:15px 16px;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:10px;
+  }
+  .brand{font-size:15px;line-height:1.25;max-width:100%;overflow-wrap:anywhere;}
+  .badge{font-size:8px;padding:7px 9px;max-width:100%;white-space:normal;line-height:1.35;}
+  .content{padding:18px 16px;}
+  .topActions{flex-wrap:wrap;}
+  .ghost{max-width:100%;white-space:normal;line-height:1.35;}
+
+  .dossier{display:flex;flex-direction:column;width:100%;}
+  .dossierPhoto{width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:4/3;}
+  .dossierPhoto img{width:100%;height:100%;object-fit:contain;}
+  .dossierBody{width:100%;padding:20px 16px;overflow-wrap:anywhere;}
+  .dossierTop{display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
+  .dossierRole{font-size:clamp(27px,9vw,38px);line-height:.98;overflow-wrap:anywhere;}
+  .verified{font-size:8px;max-width:100%;white-space:normal;line-height:1.35;}
+  .meta{grid-template-columns:1fr;gap:8px;margin:18px 0;}
+  .metaBox{min-width:0;}
+  .metaValue,.dossierText,.recordBlockText,.secretCopy,.secretHook,.secretProgressHint{overflow-wrap:anywhere;word-break:break-word;}
+  .known{gap:6px;}
+  .pill{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+
+  .secretMission{padding:13px;margin-top:18px;}
+  .secretHead{align-items:flex-start;}
+  .secretTitle,.secretStatus{min-width:0;}
+  .secretInputRow,.secretProgressRow{width:100%;}
+  .secretInput{font-size:14px;letter-spacing:.12em;}
+  .secretBtn{padding:0 12px;flex:0 0 auto;}
+  .secretTable{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .secretTableHead,.secretTableRow{min-width:0;}
+  .secretTableInput{min-width:0;max-width:100%;}
+  .hunterTable{overflow-x:auto;}
+  .hunterTable .secretTableHead,.hunterTable .hunterTableRow{min-width:300px;}
+  .lateMissionNote{overflow-wrap:anywhere;}
+
+  .recordSection{padding:13px;margin-top:16px;overflow-wrap:anywhere;}
+  .dossierActions{width:100%;}
+  .dossierActions button,.actions button{width:100%;min-height:46px;}
+
+  .directAccess{width:100%;margin-top:28px;padding:15px;}
+  .codeInput{font-size:18px;padding:14px;}
+  .enter{padding:15px;}
+
+  #finalInput{font-size:24px;letter-spacing:.18em;padding:16px 12px;}
+  .terminal{padding:16px;}
+  .terminalLabel{flex-wrap:wrap;font-size:8px;}
+  .mission{min-height:0;padding:15px;}
+  .mname{font-size:17px;}
+  .mnote{font-size:10px;}
+  .inputRow{width:100%;}
+  .fragmentInput{width:58px;flex:0 0 58px;}
+  .submit{min-width:0;}
+
+  .modal{padding:calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));align-items:flex-start;}
+  .modalBox{width:100%;max-height:calc(100dvh - 20px);border-radius:16px;}
+  .modalHead{padding:13px 14px;}
+  .authContent{padding:20px 16px;}
+  .authRole{font-size:clamp(27px,9vw,40px);}
+  .authPhoto{min-height:220px;max-height:none;height:34vh;}
+}
+
+@media(max-width:380px){
+  .screen{padding-left:9px;padding-right:9px;}
+  .content{padding-left:13px;padding-right:13px;}
+  .header{padding-left:13px;padding-right:13px;}
+  .dossierBody{padding-left:13px;padding-right:13px;}
+  .brand{font-size:14px;}
+  .secretInputRow{gap:6px;}
+  .secretInput{font-size:13px;letter-spacing:.08em;}
+  .secretBtn{padding:0 9px;font-size:8px;}
+  .secretTableHead,.secretTableRow{padding-left:6px;padding-right:6px;gap:4px;}
+  .hunterTable .secretTableHead,.hunterTable .hunterTableRow{min-width:286px;}
+}
+
+
+@media(max-width:650px) and (orientation:landscape){
+  .screen{align-items:flex-start;}
+  .dossierPhoto{aspect-ratio:16/7;}
+  .authPhoto{height:42vh;}
+}
+
 </style>
 </head>
 <body>
