@@ -257,13 +257,14 @@ and authenticate using the personal access code assigned to you. This file conta
     agentModal.classList.remove("hidden");
     document.getElementById("closeModal").addEventListener("click",closeModal);
     const input=document.getElementById("agentCode"),btn=document.getElementById("authBtn");
-    input.focus();input.addEventListener("input",()=>input.value=input.value.replace(/[^a-z0-9 ]/gi,"").toUpperCase());
+    // Do not auto-focus: on mobile, let the player tap the code field manually.
+    input.addEventListener("input",()=>input.value=input.value.replace(/[^a-z0-9 ]/gi,"").toUpperCase());
     input.addEventListener("keydown",e=>{if(e.key==="Enter")authenticate(agent,input,document.getElementById("authMsg"));});
     btn.addEventListener("click",()=>authenticate(agent,input,document.getElementById("authMsg")));
   }
   function authenticate(agent,input,msg){
     const value=input.value.trim().toUpperCase();
-    if(value===agent.code){unlocked.add(agent.id);showDossier(agent);buildIdentity();}
+    if(value===agent.code){input.blur();unlocked.add(agent.id);showDossier(agent);buildIdentity();}
     else{msg.textContent="ACCESS DENIED — VERIFY YOUR PERSONAL CODE.";input.classList.remove("shake");void input.offsetWidth;input.classList.add("shake");}
   }
   function showDossier(agent){
@@ -314,10 +315,14 @@ and authenticate using the personal access code assigned to you. This file conta
   }
   function unlockSecret(agent,input,msg){
     const value=input.value.trim().toUpperCase();
-    if(value===agent.secret.code){agentSecretUnlocked.add(agent.id);showDossier(agent);}
+    if(value===agent.secret.code){input.blur();agentSecretUnlocked.add(agent.id);showDossier(agent);}
     else{msg.textContent="ACCESS DENIED — CODE BELUM SESUAI.";input.classList.remove("shake");void input.offsetWidth;input.classList.add("shake");}
   }
-  function closeModal(){agentModal.classList.add("hidden");modalBox.innerHTML="";}
+  function closeModal(){
+    const active=document.activeElement;
+    if(active && typeof active.blur==="function") active.blur();
+    agentModal.classList.add("hidden");modalBox.innerHTML="";
+  }
   agentModal.addEventListener("click",e=>{if(e.target===agentModal)closeModal();});
   function showScreen(target){[intro,identity,game].forEach(s=>s.classList.add("hidden"));target.classList.remove("hidden");window.scrollTo(0,0);}
   document.getElementById("beginBtn").addEventListener("click",()=>{showScreen(identity);buildIdentity();});
