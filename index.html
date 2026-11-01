@@ -1,3 +1,4 @@
+<!-- BLACKOUT V7 — Secret Mission reset control -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -146,6 +147,10 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
 .secretTableActions{display:flex;justify-content:flex-end;margin-top:9px}
 .secretTableBtn{border:1px solid var(--line);background:#0d1014;color:#b8bec6;border-radius:8px;padding:9px 12px;font-size:8px;font-weight:950;letter-spacing:.12em}
 .secretTableBtn:hover{border-color:#56606b;color:#e5e9ec}
+
+.secretResetRow{display:flex;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:1px solid #1d2329}
+.secretResetBtn{border:1px solid #49343a;background:#0d1014;color:#9b737b;border-radius:8px;padding:8px 11px;font-size:7px;font-weight:950;letter-spacing:.12em}
+.secretResetBtn:hover{border-color:#6b414b;color:#d39aa5}
 .hunterTable{grid-template-columns:72px 110px 1fr 76px}
 .hunterTableRow{grid-template-columns:72px 110px 1fr 76px}
 .hunterTable .secretTableHead{grid-template-columns:72px 110px 1fr 76px}
@@ -221,6 +226,8 @@ body{width:100%;min-width:0;overflow-x:hidden;}
   .hunterTable{overflow-x:auto;}
   .hunterTable .secretTableHead,.hunterTable .hunterTableRow{min-width:300px;}
   .lateMissionNote{overflow-wrap:anywhere;}
+  .secretResetRow{justify-content:stretch;}
+  .secretResetBtn{width:100%;min-height:40px;}
 
   .recordSection{padding:13px;margin-top:16px;overflow-wrap:anywhere;}
   .dossierActions{width:100%;}
@@ -493,6 +500,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
     document.getElementById("agentPageBadge").textContent="AGENT "+agent.num+" // ACCESS GRANTED";
 
     let secretHtml="";
+    const resetSecretHtml='<div class="secretResetRow"><button class="secretResetBtn" id="resetSecretMission" type="button">RESET SECRET MISSION</button></div>';
     if(secretUnlocked){
       if(agent.id==="architect"){
         const predictions=getArchitectPredictions(agent);
@@ -522,6 +530,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '<div class="secretTableActions"><button class="secretTableBtn" id="saveArchitectProgress" type="button">UPDATE PREDICTIONS</button></div>'+
               '<div class="secretProgressHint">Isi prediksi sebelum mission dimulai, lalu isi reality setelah hasilnya diketahui. Dua prediksi yang benar sudah memenuhi objective.</div>'+
             '</div>'+
+            resetSecretHtml+
           '</div>';
       }else if(agent.id==="hunter"){
         const guesses=getHunterGuesses(agent);
@@ -551,6 +560,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '<div class="secretTableActions"><button class="secretTableBtn" id="saveHunterProgress" type="button">UPDATE HUNTER LOG</button></div>'+
               '<div class="lateMissionNote"><strong>LATE MISSION TRACKER</strong><br>Tracker ini paling masuk akal diisi mulai MISSION 04, setelah kamu punya cukup observasi untuk menebak Secret Mission agent lain.</div>'+ 
             '</div>'+
+            resetSecretHtml+
           '</div>';
       }else{
         const cfg=SECRET_PROGRESS[agent.id];
@@ -571,6 +581,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '</div>'+ 
               '<div class="secretProgressHint">'+escapeHtml(cfg.hint)+' Progress ini diisi manual oleh agent yang bersangkutan.</div>'+ 
             '</div>'+ 
+            resetSecretHtml+
           '</div>';
       }
     }else{
@@ -617,6 +628,10 @@ body{width:100%;min-width:0;overflow-x:hidden;}
           '</div>'+ 
         '</div>'+ 
       '</div>';
+
+    if(secretUnlocked){
+      document.getElementById("resetSecretMission").addEventListener("click",()=>resetSecretMission(agent));
+    }
 
     document.getElementById("enterMission").addEventListener("click",()=>showScreen(game));
     document.getElementById("backToAccess").addEventListener("click",()=>showScreen(intro));
@@ -680,6 +695,19 @@ body{width:100%;min-width:0;overflow-x:hidden;}
       input.addEventListener("keydown",e=>{if(e.key==="Enter")unlockSecret(agent,input,msg);});
       btn.addEventListener("click",()=>unlockSecret(agent,input,msg));
     }
+  }
+
+  function resetSecretMission(agent){
+    const confirmed=window.confirm("RESET SECRET MISSION\n\nProgress, tracker, dan status unlock agent ini akan dihapus. Kamu harus memasukkan kembali access word untuk membuka Secret Mission.");
+    if(!confirmed) return;
+    try{
+      localStorage.removeItem(secretUnlockKey(agent));
+      localStorage.removeItem(secretProgressKey(agent));
+      localStorage.removeItem(architectProgressKey(agent));
+      localStorage.removeItem(hunterProgressKey(agent));
+    }catch(e){}
+    agentSecretUnlocked.delete(agent.id);
+    showAgentPage(agent);
   }
 
   function unlockSecret(agent,input,msg){
