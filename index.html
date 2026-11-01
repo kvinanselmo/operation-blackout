@@ -285,7 +285,7 @@ and authenticate using the personal access code assigned to you. This file conta
     <div class="secretMission">
       <div class="secretHead"><div class="secretTitle">SECRET MISSION</div>
       <div class="secretStatus">${secretUnlocked?"UNLOCKED":"LOCKED"}</div></div>
-      <div class="secretIntro">${secretUnlocked ? "Misi pribadi ini telah terbuka. Informasi di bawah ini hanya ditujukan untuk agent yang bersangkutan." : missionOneComplete ? "MISSION 01 COMPLETE. Gunakan scrambled CODE dari classified envelope kamu untuk membuka secret mission ini. Susun hurufnya menjadi kata asli, lalu masukkan hasilnya di bawah. CODE ini bukan bagian dari kode vault." : "Bagian ini masih terkunci. Selesaikan MISSION 01 terlebih dahulu. Setelah itu, kamu akan menerima classified envelope berisi scrambled CODE pribadi untuk membuka secret mission."}</div>
+      <div class="secretIntro">${secretUnlocked ? "Misi pribadi ini telah terbuka. Informasi di bawah ini hanya ditujukan untuk agent yang bersangkutan." : missionOneComplete ? "Misi pribadimu siap dijalankan. Masukkan access word untuk membuka akses." : "Sebuah misi pribadi menunggumu. Selesaikan MISSION 01 untuk membuka akses."}</div>
       ${secretUnlocked ? `
         <div class="secretUnlocked">
           <div class="secretMissionName">${escapeHtml(agent.secret.title)}</div>
@@ -294,7 +294,7 @@ and authenticate using the personal access code assigned to you. This file conta
           <div class="secretHook"><strong>PERKEMBANGAN:</strong> ${escapeHtml(agent.secret.development)}</div>
         </div>` : secretReady ? `
         <div class="secretInputRow">
-          <input class="secretInput" id="secretCode" maxlength="16" autocomplete="off" spellcheck="false" placeholder="DECRYPTED WORD" aria-label="Decrypted secret mission code">
+          <input class="secretInput" id="secretCode" maxlength="16" autocomplete="off" spellcheck="false" placeholder="ACCESS WORD" aria-label="Decrypted secret mission code">
           <button class="secretBtn" id="secretBtn" type="button">UNLOCK</button>
         </div>
         <div class="secretMsg" id="secretMsg"></div>` : ``}
