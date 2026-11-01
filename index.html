@@ -89,7 +89,7 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
   <div class="wrap hero">
     <div class="kicker">OPERATION BLACKOUT</div>
     <div class="logo">THE VAULT</div>
-    <div class="subtitle">SIX GAMES // SIX FRAGMENTS // ONE FINAL CODE</div>
+    <div class="subtitle">SIX MISSIONS // SIX FRAGMENTS // ONE FINAL CODE</div>
     <div class="boot">
       <div class="bootline">SYSTEM <b>ONLINE</b></div>
       <div class="bootline">VAULT STATUS <b>LOCKED</b></div>
@@ -112,8 +112,8 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
         <div class="kicker">MISSION CONTROL</div>
         <h1 class="title">Earn the fragments.</h1>
         <p class="desc">
-          Selesaikan setiap game. Setelah mendapatkan hasilnya, masukkan <strong>1 karakter kode</strong>
-          yang kalian dapat ke kolom game tersebut. Website <strong>tidak akan memberi tahu jawabannya di awal</strong>.
+          Selesaikan setiap mission. Setelah mendapatkan hasilnya, masukkan <strong>1 karakter kode</strong>
+          yang kalian dapat ke kolom mission tersebut. Website <strong>tidak akan memberi tahu jawabannya di awal</strong>.
         </p>
 
         <div class="progressWrap">
@@ -134,7 +134,7 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
                    placeholder="••••••" aria-label="Final vault code" disabled>
             <div class="hint">Setelah keenam fragment terverifikasi, susun semuanya menjadi satu kode dan masukkan di sini.</div>
           </div>
-          <div class="message" id="message">Complete all six games first.</div>
+          <div class="message" id="message">Complete all six missions first.</div>
           <div class="actions">
             <button class="primary" id="unlockBtn" type="button" disabled>UNLOCK VAULT</button>
             <button class="secondary" id="resetBtn" type="button">RESET</button>
@@ -144,7 +144,7 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
         <div class="vault" id="vault">
           <div class="vicon" id="vicon">🔒</div>
           <div class="vstate" id="vstate">VAULT LOCKED</div>
-          <div class="vsub" id="vsub">Six games. Six fragments. One final answer.</div>
+          <div class="vsub" id="vsub">Six missions. Six fragments. One final answer.</div>
         </div>
       </div>
     </div>
@@ -157,12 +157,12 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
 
   /*
     The actual answers are intentionally NOT rendered anywhere on the page.
-    Expected fragments, by game:
+    Expected fragments, by mission:
     1=4, 2=L, 3=1, 4=Y, 5=F, 6=M
     Final code: F4M1LY
   */
 
-  const GAME_NAMES = [
+  const MISSION_NAMES = [
     "THE PROFILE",
     "CHEMISTRY",
     "THE MEMORY",
@@ -171,16 +171,15 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
     "THE FINAL"
   ];
 
-  const GAME_NOTES = [
-    "Enter the character awarded after this game.",
-    "Enter the character awarded after this game.",
-    "Enter the character awarded after this game.",
-    "Enter the character awarded after this game.",
-    "Enter the character awarded after this game.",
-    "Enter the character awarded after this game."
+  const MISSION_NOTES = [
+    "Enter the character awarded after this mission.",
+    "Enter the character awarded after this mission.",
+    "Enter the character awarded after this mission.",
+    "Enter the character awarded after this mission.",
+    "Enter the character awarded after this mission.",
+    "Enter the character awarded after this mission."
   ];
 
-  // Obfuscated from the visible UI; these are the six accepted fragments.
   const EXPECTED = ["4","L","1","Y","F","M"];
   const FINAL_CODE = "F4M1LY";
 
@@ -201,19 +200,19 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
 
   const accepted = Array(6).fill(false);
 
-  function buildGames(){
+  function buildMissions(){
     missions.innerHTML = "";
-    GAME_NAMES.forEach(function(name, i){
+    MISSION_NAMES.forEach(function(name, i){
       const card = document.createElement("div");
       card.className = "mission";
-      card.dataset.game = String(i);
+      card.dataset.mission = String(i);
       card.innerHTML =
         '<div>' +
-          '<div class="mnum">GAME ' + String(i+1).padStart(2,"0") + '</div>' +
+          '<div class="mnum">MISSION ' + String(i+1).padStart(2,"0") + '</div>' +
           '<div class="mname">' + escapeHtml(name) + '</div>' +
-          '<div class="mnote">' + escapeHtml(GAME_NOTES[i]) + '</div>' +
+          '<div class="mnote">' + escapeHtml(MISSION_NOTES[i]) + '</div>' +
           '<div class="inputRow">' +
-            '<input class="fragmentInput" maxlength="1" autocomplete="off" spellcheck="false" aria-label="Code fragment for Game ' + (i+1) + '">' +
+            '<input class="fragmentInput" maxlength="1" autocomplete="off" spellcheck="false" aria-label="Code fragment for Mission ' + (i+1) + '">' +
             '<button class="submit" type="button">SUBMIT</button>' +
           '</div>' +
         '</div>' +
@@ -260,7 +259,6 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
       st.className = "mstatus good";
       updateProgress();
     }else{
-      card.classList.remove("accepted");
       const st = card.querySelector(".mstatus");
       st.textContent = "ACCESS DENIED — CHECK YOUR RESULT";
       st.className = "mstatus";
@@ -326,15 +324,15 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
     unlockBtn.disabled = true;
     terminalStatus.textContent = "LOCKED";
     terminalStatus.className = "terminalStatus";
-    message.textContent = "Complete all six games first.";
+    message.textContent = "Complete all six missions first.";
     message.style.color = "var(--muted)";
     vicon.textContent = "🔒";
     vstate.textContent = "VAULT LOCKED";
     vstate.style.color = "var(--text)";
-    vsub.textContent = "Six games. Six fragments. One final answer.";
+    vsub.textContent = "Six missions. Six fragments. One final answer.";
     progressText.textContent = "0 / 6";
     bar.style.width = "0%";
-    buildGames();
+    buildMissions();
   }
 
   function escapeHtml(value){
@@ -346,15 +344,17 @@ font-weight:900;letter-spacing:.14em}.primary{border:1px solid var(--accent);bac
   document.getElementById("beginBtn").addEventListener("click", function(){
     intro.classList.add("hidden");
     game.classList.remove("hidden");
-    buildGames();
+    buildMissions();
   });
 
   finalInput.addEventListener("input", function(){
     finalInput.value = finalInput.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,6);
   });
+
   finalInput.addEventListener("keydown", function(event){
     if(event.key === "Enter") verifyFinal();
   });
+
   unlockBtn.addEventListener("click", verifyFinal);
   document.getElementById("resetBtn").addEventListener("click", resetAll);
 })();
