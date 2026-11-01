@@ -1,4 +1,4 @@
-<!-- BLACKOUT V7 — Secret Mission reset control -->
+<!-- BLACKOUT V8 — Visible Secret Mission reset control -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,8 +149,11 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
 .secretTableBtn:hover{border-color:#56606b;color:#e5e9ec}
 
 .secretResetRow{display:flex;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:1px solid #1d2329}
-.secretResetBtn{border:1px solid #49343a;background:#0d1014;color:#9b737b;border-radius:8px;padding:8px 11px;font-size:7px;font-weight:950;letter-spacing:.12em}
-.secretResetBtn:hover{border-color:#6b414b;color:#d39aa5}
+.secretResetBtn{border:1px solid #6b414b;background:#120c0e;color:#d39aa5;border-radius:8px;padding:8px 11px;font-size:7px;font-weight:950;letter-spacing:.12em;cursor:pointer}
+.secretResetBtn:hover{border-color:#a45b68;color:#f0b1bc;background:#190d10}
+.secretHeadActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.secretHeadReset{border:1px solid #6b414b;background:#120c0e;color:#d39aa5;border-radius:999px;padding:7px 10px;font-size:7px;font-weight:950;letter-spacing:.1em;cursor:pointer;white-space:nowrap}
+.secretHeadReset:hover{border-color:#a45b68;color:#f0b1bc;background:#190d10}
 .hunterTable{grid-template-columns:72px 110px 1fr 76px}
 .hunterTableRow{grid-template-columns:72px 110px 1fr 76px}
 .hunterTable .secretTableHead{grid-template-columns:72px 110px 1fr 76px}
@@ -228,6 +231,8 @@ body{width:100%;min-width:0;overflow-x:hidden;}
   .lateMissionNote{overflow-wrap:anywhere;}
   .secretResetRow{justify-content:stretch;}
   .secretResetBtn{width:100%;min-height:40px;}
+  .secretHeadActions{width:100%;justify-content:space-between;}
+  .secretHeadReset{flex:1;min-height:38px;}
 
   .recordSection{padding:13px;margin-top:16px;overflow-wrap:anywhere;}
   .dossierActions{width:100%;}
@@ -500,7 +505,8 @@ body{width:100%;min-width:0;overflow-x:hidden;}
     document.getElementById("agentPageBadge").textContent="AGENT "+agent.num+" // ACCESS GRANTED";
 
     let secretHtml="";
-    const resetSecretHtml='<div class="secretResetRow"><button class="secretResetBtn" id="resetSecretMission" type="button">RESET SECRET MISSION</button></div>';
+    const resetSecretHtml='';
+    const secretHeaderActions=secretUnlocked ? '<div class="secretHeadActions"><div class="secretStatus">UNLOCKED</div><button class="secretHeadReset" id="resetSecretMission" type="button">RESET SECRET MISSION</button></div>' : '<div class="secretStatus">LOCKED</div>';
     if(secretUnlocked){
       if(agent.id==="architect"){
         const predictions=getArchitectPredictions(agent);
@@ -530,7 +536,6 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '<div class="secretTableActions"><button class="secretTableBtn" id="saveArchitectProgress" type="button">UPDATE PREDICTIONS</button></div>'+
               '<div class="secretProgressHint">Isi prediksi sebelum mission dimulai, lalu isi reality setelah hasilnya diketahui. Dua prediksi yang benar sudah memenuhi objective.</div>'+
             '</div>'+
-            resetSecretHtml+
           '</div>';
       }else if(agent.id==="hunter"){
         const guesses=getHunterGuesses(agent);
@@ -560,7 +565,6 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '<div class="secretTableActions"><button class="secretTableBtn" id="saveHunterProgress" type="button">UPDATE HUNTER LOG</button></div>'+
               '<div class="lateMissionNote"><strong>LATE MISSION TRACKER</strong><br>Tracker ini paling masuk akal diisi mulai MISSION 04, setelah kamu punya cukup observasi untuk menebak Secret Mission agent lain.</div>'+ 
             '</div>'+
-            resetSecretHtml+
           '</div>';
       }else{
         const cfg=SECRET_PROGRESS[agent.id];
@@ -581,7 +585,6 @@ body{width:100%;min-width:0;overflow-x:hidden;}
               '</div>'+ 
               '<div class="secretProgressHint">'+escapeHtml(cfg.hint)+' Progress ini diisi manual oleh agent yang bersangkutan.</div>'+ 
             '</div>'+ 
-            resetSecretHtml+
           '</div>';
       }
     }else{
@@ -609,7 +612,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
           '<div class="authLabel">KNOWN FOR</div>'+ 
           '<div class="known">'+agent.known.map(x=>'<span class="pill">'+escapeHtml(x)+'</span>').join("")+'</div>'+ 
           '<div class="secretMission">'+
-            '<div class="secretHead"><div class="secretTitle">SECRET MISSION</div><div class="secretStatus">'+(secretUnlocked?"UNLOCKED":"LOCKED")+'</div></div>'+ 
+            '<div class="secretHead"><div class="secretTitle">SECRET MISSION</div>'+secretHeaderActions+'</div>'+ 
             '<div class="secretIntro">'+(secretUnlocked?"Misi pribadi ini berisi objective dan progress kamu. Informasi lain disimpan di PERSONAL RECORD.":"Gunakan access word yang kamu terima setelah MISSION 01 untuk membuka misi pribadi ini.")+'</div>'+ 
             secretHtml+
           '</div>'+ 
