@@ -268,6 +268,8 @@ and authenticate using the personal access code assigned to you. This file conta
   }
   function showDossier(agent){
     const secretUnlocked=agentSecretUnlocked.has(agent.id);
+    const missionOneComplete=accepted[0]===true;
+    const secretReady=missionOneComplete && !secretUnlocked;
     modalBox.innerHTML=`<div class="modalHead"><div class="brand">BLACKOUT <span>//</span> CLASSIFIED DOSSIER</div>
     <button class="close" type="button" id="closeModal">CLOSE</button></div><div class="dossier">
     <div class="dossierPhoto"><img src="${imgFor(agent)}" alt="${escapeHtml(agent.role)} portrait"></div><div class="dossierBody">
@@ -280,21 +282,21 @@ and authenticate using the personal access code assigned to you. This file conta
     <div class="record"><strong>PERSONAL RECORD</strong><br>${escapeHtml(agent.record)}<br><br><em>${escapeHtml(agent.note)}</em></div>
 
     <div class="secretMission">
-      <div class="secretHead"><div class="secretTitle">SECRET MISSION // GAME 01</div>
+      <div class="secretHead"><div class="secretTitle">SECRET MISSION</div>
       <div class="secretStatus">${secretUnlocked?"UNLOCKED":"LOCKED"}</div></div>
-      <div class="secretIntro">${secretUnlocked ? "Misi pribadi ini telah terbuka. Informasi di bawah ini hanya ditujukan untuk agent yang bersangkutan." : "Setelah Game 01, kamu akan menerima satu scrambled CODE pribadi. Susun hurufnya untuk menemukan kata aslinya, lalu masukkan kata tersebut di sini. CODE ini bukan bagian dari kode vault."}</div>
+      <div class="secretIntro">${secretUnlocked ? "Misi pribadi ini telah terbuka. Informasi di bawah ini hanya ditujukan untuk agent yang bersangkutan." : missionOneComplete ? "MISSION 01 COMPLETE. Gunakan scrambled CODE dari classified envelope kamu untuk membuka secret mission ini. Susun hurufnya menjadi kata asli, lalu masukkan hasilnya di bawah. CODE ini bukan bagian dari kode vault." : "Bagian ini masih terkunci. Selesaikan MISSION 01 terlebih dahulu. Setelah itu, kamu akan menerima classified envelope berisi scrambled CODE pribadi untuk membuka secret mission."}</div>
       ${secretUnlocked ? `
         <div class="secretUnlocked">
           <div class="secretMissionName">${escapeHtml(agent.secret.title)}</div>
           <div class="secretCopy"><strong>MISI</strong><br>${escapeHtml(agent.secret.brief)}</div>
           <div class="secretCopy"><strong>${escapeHtml(agent.secret.memoryTitle)}</strong><br>${escapeHtml(agent.secret.memory)}</div>
           <div class="secretHook"><strong>PERKEMBANGAN:</strong> ${escapeHtml(agent.secret.development)}</div>
-        </div>` : `
+        </div>` : secretReady ? `
         <div class="secretInputRow">
           <input class="secretInput" id="secretCode" maxlength="16" autocomplete="off" spellcheck="false" placeholder="DECRYPTED WORD" aria-label="Decrypted secret mission code">
           <button class="secretBtn" id="secretBtn" type="button">UNLOCK</button>
         </div>
-        <div class="secretMsg" id="secretMsg"></div>`}
+        <div class="secretMsg" id="secretMsg"></div>` : ``}
     </div>
 
     <div class="dossierActions"><button class="primary" id="enterMission" type="button">ENTER MISSION CONTROL</button>
@@ -303,12 +305,11 @@ and authenticate using the personal access code assigned to you. This file conta
     document.getElementById("closeModal").addEventListener("click",closeModal);
     document.getElementById("returnIdentity").addEventListener("click",closeModal);
     document.getElementById("enterMission").addEventListener("click",()=>{closeModal();showScreen(game);});
-    if(!secretUnlocked){
+    if(secretReady){
       const input=document.getElementById("secretCode"),btn=document.getElementById("secretBtn"),msg=document.getElementById("secretMsg");
       input.addEventListener("input",()=>input.value=input.value.replace(/[^a-z0-9]/gi,"").toUpperCase());
       input.addEventListener("keydown",e=>{if(e.key==="Enter")unlockSecret(agent,input,msg);});
       btn.addEventListener("click",()=>unlockSecret(agent,input,msg));
-      input.focus();
     }
   }
   function unlockSecret(agent,input,msg){
