@@ -135,6 +135,30 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
 .secretProgressInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,255,63,.08)}
 .secretProgressBtn{flex:1;border:1px solid var(--line);background:#0d1014;color:#b8bec6;border-radius:9px;font-size:9px;font-weight:950;letter-spacing:.12em}
 .secretProgressHint{margin-top:8px;color:#626a74;font-size:8px;line-height:1.5}
+.secretTable{margin-top:12px;border:1px solid #252d33;border-radius:10px;overflow:hidden;background:#050708}
+.secretTableHead,.secretTableRow{display:grid;grid-template-columns:72px 1fr 1fr;gap:8px;align-items:center;padding:8px 10px}
+.secretTableHead{background:#0c1013;color:#69717a;font-size:7px;font-weight:950;letter-spacing:.13em}
+.secretTableRow{border-top:1px solid #1c2228}
+.secretTableMission{font:900 10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#aab1b8}
+.secretTableInput{width:100%;min-width:0;padding:8px 9px;border:1px solid #303841;border-radius:7px;background:#07090b;color:#e1e5e8;font-size:9px;outline:none}
+.secretTableInput:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(217,255,63,.07)}
+.secretTableInput::placeholder{color:#4e565f}
+.secretTableActions{display:flex;justify-content:flex-end;margin-top:9px}
+.secretTableBtn{border:1px solid var(--line);background:#0d1014;color:#b8bec6;border-radius:8px;padding:9px 12px;font-size:8px;font-weight:950;letter-spacing:.12em}
+.secretTableBtn:hover{border-color:#56606b;color:#e5e9ec}
+.hunterTable{grid-template-columns:72px 110px 1fr 76px}
+.hunterTableRow{grid-template-columns:72px 110px 1fr 76px}
+.hunterTable .secretTableHead{grid-template-columns:72px 110px 1fr 76px}
+.hunterCheck{display:flex;align-items:center;justify-content:center;gap:5px;color:#737b84;font-size:7px;font-weight:900;letter-spacing:.08em}
+.hunterCheck input{accent-color:var(--accent);width:13px;height:13px}
+.lateMissionNote{margin-top:10px;padding:9px 10px;border-left:2px solid #56606b;background:#080b0d;color:#747c85;font-size:8px;line-height:1.5}
+.recordSection{margin-top:20px;padding:15px;border-left:2px solid var(--accent);background:#0a0d0e;color:#a9afb7;font-size:11px;line-height:1.65}
+.recordSectionTitle{font-size:9px;letter-spacing:.15em;font-weight:950;color:#dfe4e7;margin-bottom:8px}
+.recordBlock{margin-top:13px;padding-top:12px;border-top:1px solid #1f252b}
+.recordBlockTitle{font-size:8px;letter-spacing:.13em;font-weight:950;color:#777f88;margin-bottom:5px}
+.recordBlockText{color:#a9afb7}
+.recordSection em{color:#d9dde1}
+@media(max-width:650px){.secretTableHead,.secretTableRow{grid-template-columns:52px 1fr 1fr;gap:5px;padding:7px}.secretTableHead{font-size:6px}.secretTableInput{font-size:8px;padding:7px}.hunterTable{grid-template-columns:52px 90px 1fr 58px}.hunterTableRow{grid-template-columns:52px 90px 1fr 58px}.hunterTable .secretTableHead{grid-template-columns:52px 90px 1fr 58px}.hunterCheck{font-size:6px}.recordSection{font-size:10px}}
 .agentPagePanel{overflow:hidden}
 @media(max-width:850px){.identityGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.auth,.dossier{grid-template-columns:1fr}
 .authPhoto,.dossierPhoto{min-height:320px;max-height:420px}.authPhoto:after{background:linear-gradient(0deg,rgba(8,10,13,.98),transparent 55%)}.authContent{padding:24px}}
@@ -236,16 +260,19 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
     lucky:{target:10,label:'"HOKI BANGET GUE" DIUCAPKAN',hint:'Hitung setiap ucapan yang terdengar natural sepanjang permainan.'},
     vet:{target:10,label:'COMMAND PHRASE DIUCAPKAN',hint:'Hitung setiap kalimat yang maknanya tetap berarti kamu yang memegang komando.'},
     prodigy:{target:2,label:'MENANG MELAWAN THE VETERAN',hint:'Catat setiap kemenanganmu dalam kompetisi langsung melawan Veteran.'},
-    hunter:{target:2,label:'SECRET MISSION BERHASIL DITEBAK',hint:'Catat jumlah Secret Mission agent lain yang berhasil kamu tebak dengan benar.'},
-    forger:{target:5,label:'GESTURE / KEBIASAAN BERHASIL DITIRU',hint:'Hitung setiap imitasi yang berhasil dilakukan tanpa agent tersebut menyadarinya.'},
-    architect:{target:2,label:'PREDIKSI PEMENANG YANG BENAR',hint:'Catat prediksi pemenang yang benar sebelum mission dimulai.'}
+    forger:{target:5,label:'GESTURE / KEBIASAAN BERHASIL DITIRU',hint:'Hitung setiap imitasi yang berhasil dilakukan tanpa agent tersebut menyadarinya.'}
   };
+  const ARCHITECT_TARGET=2;
+  const HUNTER_TARGET=2;
   let currentAgent=null;
 
   function imgFor(agent){return IMAGES[agent.id];}
   function normalizeCode(v){return String(v||"").trim().toUpperCase().replace(/\s+/g," ");}
+  function normalizeText(v){return String(v||"").trim().toUpperCase().replace(/\s+/g," ");}
   function secretUnlockKey(agent){return "blackout_secret_unlocked_"+agent.id;}
   function secretProgressKey(agent){return "blackout_secret_progress_"+agent.id;}
+  function architectProgressKey(agent){return "blackout_architect_predictions_"+agent.id;}
+  function hunterProgressKey(agent){return "blackout_hunter_guesses_"+agent.id;}
 
   function isSecretUnlocked(agent){
     if(agentSecretUnlocked.has(agent.id)) return true;
@@ -278,6 +305,62 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
     return value;
   }
 
+  function defaultArchitectPredictions(){
+    return Array.from({length:6},()=>({prediction:"",reality:""}));
+  }
+
+  function getArchitectPredictions(agent){
+    let data=defaultArchitectPredictions();
+    try{
+      const raw=JSON.parse(localStorage.getItem(architectProgressKey(agent))||"null");
+      if(Array.isArray(raw)){
+        data=data.map((row,i)=>({
+          prediction:String(raw[i]?.prediction||""),
+          reality:String(raw[i]?.reality||"")
+        }));
+      }
+    }catch(e){}
+    return data;
+  }
+
+  function setArchitectPredictions(agent,data){
+    const safe=data.map(row=>({prediction:String(row.prediction||""),reality:String(row.reality||"")}));
+    try{localStorage.setItem(architectProgressKey(agent),JSON.stringify(safe));}catch(e){}
+    return safe;
+  }
+
+  function architectCorrectCount(data){
+    return data.filter(row=>normalizeText(row.prediction) && normalizeText(row.reality) && normalizeText(row.prediction)===normalizeText(row.reality)).length;
+  }
+
+  function defaultHunterGuesses(){
+    return Array.from({length:2},()=>({mission:"",agent:"",guess:"",correct:false}));
+  }
+
+  function getHunterGuesses(agent){
+    let data=defaultHunterGuesses();
+    try{
+      const raw=JSON.parse(localStorage.getItem(hunterProgressKey(agent))||"null");
+      if(Array.isArray(raw)){
+        data=data.map((row,i)=>({
+          mission:String(raw[i]?.mission||""),
+          agent:String(raw[i]?.agent||""),
+          guess:String(raw[i]?.guess||""),
+          correct:Boolean(raw[i]?.correct)
+        }));
+      }
+    }catch(e){}
+    return data;
+  }
+
+  function setHunterGuesses(agent,data){
+    const safe=data.map(row=>({mission:String(row.mission||""),agent:String(row.agent||""),guess:String(row.guess||""),correct:Boolean(row.correct)}));
+    try{localStorage.setItem(hunterProgressKey(agent),JSON.stringify(safe));}catch(e){}
+    return safe;
+  }
+
+  function hunterCorrectCount(data){return data.filter(row=>row.correct).length;}
+
   function showScreen(target){
     [intro,agentPage,game].forEach(s=>s.classList.add("hidden"));
     target.classList.remove("hidden");
@@ -301,87 +384,189 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
   }
 
   function showAgentPage(agent){
+    showScreen(agentPage);
     currentAgent=agent;
     const secretUnlocked=isSecretUnlocked(agent);
-    const cfg=SECRET_PROGRESS[agent.id];
-    const progress=getSecretProgress(agent);
 
     document.getElementById("agentPageBadge").textContent="AGENT "+agent.num+" // ACCESS GRANTED";
 
     let secretHtml="";
     if(secretUnlocked){
-      secretHtml=
-        '<div class="secretUnlocked">'+
-          '<div class="secretMissionName">'+escapeHtml(agent.secret.title)+'</div>'+
-          '<div class="secretCopy"><strong>MISI</strong><br>'+escapeHtml(agent.secret.brief)+'</div>'+
-          '<div class="secretCopy"><strong>'+escapeHtml(agent.secret.memoryTitle)+'</strong><br>'+escapeHtml(agent.secret.memory)+'</div>'+
-          '<div class="secretHook"><strong>PERKEMBANGAN:</strong> '+escapeHtml(agent.secret.development)+'</div>'+
-          '<div class="secretProgress">'+
-            '<div class="secretProgressHead">'+
-              '<span class="secretProgressLabel">SECRET PROGRESS // '+escapeHtml(cfg.label)+'</span>'+
-              '<span class="secretProgressCount" id="secretProgressCount">'+progress+' / '+cfg.target+'</span>'+
+      if(agent.id==="architect"){
+        const predictions=getArchitectPredictions(agent);
+        const correct=architectCorrectCount(predictions);
+        const rows=predictions.slice(1).map((row,i)=>{
+          const missionIndex=i+1;
+          return '<div class="secretTableRow">'+
+            '<div class="secretTableMission">'+String(missionIndex+1).padStart(2,"0")+'</div>'+
+            '<input class="secretTableInput architectPrediction" data-index="'+missionIndex+'" data-field="prediction" value="'+escapeHtml(row.prediction)+'" placeholder="WHO / TEAM?" aria-label="Prediction for Mission '+(missionIndex+1)+'">'+
+            '<input class="secretTableInput architectPrediction" data-index="'+missionIndex+'" data-field="reality" value="'+escapeHtml(row.reality)+'" placeholder="WHO / TEAM?" aria-label="Reality for Mission '+(missionIndex+1)+'">'+
+          '</div>';
+        }).join("");
+        secretHtml=
+          '<div class="secretUnlocked">'+
+            '<div class="secretMissionName">'+escapeHtml(agent.secret.title)+'</div>'+
+            '<div class="secretCopy"><strong>MISI</strong><br>'+escapeHtml(agent.secret.brief)+'</div>'+
+            '<div class="secretProgress">'+
+              '<div class="secretProgressHead">'+
+                '<span class="secretProgressLabel">CORRECT PREDICTIONS</span>'+
+                '<span class="secretProgressCount" id="architectProgressCount">'+correct+' / '+ARCHITECT_TARGET+'</span>'+
+              '</div>'+
+              '<div class="progress"><div class="bar" id="architectProgressBar" style="width:'+Math.min(100,correct/ARCHITECT_TARGET*100)+'%"></div></div>'+
+              '<div class="secretTable">'+
+                '<div class="secretTableHead"><div>MISSION</div><div>PREDICTION</div><div>REALITY</div></div>'+
+                rows+
+              '</div>'+
+              '<div class="secretTableActions"><button class="secretTableBtn" id="saveArchitectProgress" type="button">UPDATE PREDICTIONS</button></div>'+
+              '<div class="secretProgressHint">Isi prediksi sebelum mission dimulai, lalu isi reality setelah hasilnya diketahui. Dua prediksi yang benar sudah memenuhi objective.</div>'+
             '</div>'+
-            '<div class="progress"><div class="bar" id="secretProgressBar" style="width:'+(progress/cfg.target*100)+'%"></div></div>'+
-            '<div class="secretProgressRow">'+
-              '<input class="secretProgressInput" id="secretProgressInput" type="number" min="0" max="'+cfg.target+'" step="1" value="'+progress+'" inputmode="numeric" aria-label="Secret mission progress">'+
-              '<button class="secretProgressBtn" id="saveSecretProgress" type="button">UPDATE PROGRESS</button>'+
+          '</div>';
+      }else if(agent.id==="hunter"){
+        const guesses=getHunterGuesses(agent);
+        const correct=hunterCorrectCount(guesses);
+        const rows=guesses.map((row,i)=>
+          '<div class="secretTableRow hunterTableRow">'+
+            '<input class="secretTableInput hunterField" data-index="'+i+'" data-field="mission" type="number" min="1" max="6" value="'+escapeHtml(row.mission)+'" placeholder="04" aria-label="Mission number for Hunter guess '+(i+1)+'">'+
+            '<input class="secretTableInput hunterField" data-index="'+i+'" data-field="agent" value="'+escapeHtml(row.agent)+'" placeholder="AGENT" aria-label="Agent guessed '+(i+1)+'">'+
+            '<input class="secretTableInput hunterField" data-index="'+i+'" data-field="guess" value="'+escapeHtml(row.guess)+'" placeholder="SECRET MISSION" aria-label="Secret mission guess '+(i+1)+'">'+
+            '<label class="hunterCheck"><input class="hunterCorrect" data-index="'+i+'" type="checkbox" '+(row.correct?'checked':'')+'>CORRECT</label>'+
+          '</div>'
+        ).join("");
+        secretHtml=
+          '<div class="secretUnlocked">'+
+            '<div class="secretMissionName">'+escapeHtml(agent.secret.title)+'</div>'+
+            '<div class="secretCopy"><strong>MISI</strong><br>'+escapeHtml(agent.secret.brief)+'</div>'+
+            '<div class="secretProgress">'+
+              '<div class="secretProgressHead">'+
+                '<span class="secretProgressLabel">CORRECT GUESSES</span>'+
+                '<span class="secretProgressCount" id="hunterProgressCount">'+correct+' / '+HUNTER_TARGET+'</span>'+
+              '</div>'+
+              '<div class="progress"><div class="bar" id="hunterProgressBar" style="width:'+Math.min(100,correct/HUNTER_TARGET*100)+'%"></div></div>'+
+              '<div class="secretTable hunterTable">'+
+                '<div class="secretTableHead"><div>MISSION</div><div>AGENT</div><div>SECRET MISSION GUESS</div><div>RESULT</div></div>'+
+                rows+
+              '</div>'+
+              '<div class="secretTableActions"><button class="secretTableBtn" id="saveHunterProgress" type="button">UPDATE HUNTER LOG</button></div>'+
+              '<div class="lateMissionNote"><strong>LATE MISSION TRACKER</strong><br>Tracker ini paling masuk akal diisi mulai MISSION 04, setelah kamu punya cukup observasi untuk menebak Secret Mission agent lain.</div>'+ 
             '</div>'+
-            '<div class="secretProgressHint">'+escapeHtml(cfg.hint)+' Progress ini diisi manual oleh agent yang bersangkutan.</div>'+
-          '</div>'+
-        '</div>';
+          '</div>';
+      }else{
+        const cfg=SECRET_PROGRESS[agent.id];
+        const progress=getSecretProgress(agent);
+        secretHtml=
+          '<div class="secretUnlocked">'+
+            '<div class="secretMissionName">'+escapeHtml(agent.secret.title)+'</div>'+
+            '<div class="secretCopy"><strong>MISI</strong><br>'+escapeHtml(agent.secret.brief)+'</div>'+
+            '<div class="secretProgress">'+
+              '<div class="secretProgressHead">'+
+                '<span class="secretProgressLabel">PROGRESS // '+escapeHtml(cfg.label)+'</span>'+
+                '<span class="secretProgressCount" id="secretProgressCount">'+progress+' / '+cfg.target+'</span>'+ 
+              '</div>'+ 
+              '<div class="progress"><div class="bar" id="secretProgressBar" style="width:'+(progress/cfg.target*100)+'%"></div></div>'+ 
+              '<div class="secretProgressRow">'+
+                '<input class="secretProgressInput" id="secretProgressInput" type="number" min="0" max="'+cfg.target+'" step="1" value="'+progress+'" inputmode="numeric" aria-label="Secret mission progress">'+
+                '<button class="secretProgressBtn" id="saveSecretProgress" type="button">UPDATE PROGRESS</button>'+ 
+              '</div>'+ 
+              '<div class="secretProgressHint">'+escapeHtml(cfg.hint)+' Progress ini diisi manual oleh agent yang bersangkutan.</div>'+ 
+            '</div>'+ 
+          '</div>';
+      }
     }else{
       secretHtml=
         '<div class="secretInputRow">'+
           '<input class="secretInput" id="secretCode" maxlength="16" autocomplete="off" spellcheck="false" placeholder="DECRYPTED ACCESS WORD" aria-label="Decrypted secret mission code">'+
-          '<button class="secretBtn" id="secretBtn" type="button">UNLOCK</button>'+
-        '</div>'+
+          '<button class="secretBtn" id="secretBtn" type="button">UNLOCK</button>'+ 
+        '</div>'+ 
         '<div class="secretMsg" id="secretMsg"></div>';
     }
 
     agentDossier.innerHTML=
       '<div class="dossier">'+
-        '<div class="dossierPhoto"><img src="'+imgFor(agent)+'" alt="'+escapeHtml(agent.role)+' portrait"></div>'+
+        '<div class="dossierPhoto"><img src="'+imgFor(agent)+'" alt="'+escapeHtml(agent.role)+' portrait"></div>'+ 
         '<div class="dossierBody">'+
           '<div class="dossierTop">'+
-            '<div><div class="authKicker">IDENTITY VERIFIED</div><div class="dossierRole">'+escapeHtml(agent.role)+'</div><div class="authNum">AGENT '+agent.num+'</div></div>'+
-            '<div class="verified">ACCESS GRANTED</div>'+
-          '</div>'+
+            '<div><div class="authKicker">IDENTITY VERIFIED</div><div class="dossierRole">'+escapeHtml(agent.role)+'</div><div class="authNum">AGENT '+agent.num+'</div></div>'+ 
+            '<div class="verified">ACCESS GRANTED</div>'+ 
+          '</div>'+ 
           '<div class="meta">'+
-            '<div class="metaBox"><div class="metaLabel">SPECIALIZATION</div><div class="metaValue">'+escapeHtml(agent.specialization)+'</div></div>'+
-            '<div class="metaBox"><div class="metaLabel">LAST SIGNIFICANT LOCATION</div><div class="metaValue">'+escapeHtml(agent.city)+'</div></div>'+
-          '</div>'+
-          '<div class="dossierText">'+escapeHtml(agent.profile)+'</div>'+
-          '<div class="authLabel">KNOWN FOR</div>'+
-          '<div class="known">'+agent.known.map(x=>'<span class="pill">'+escapeHtml(x)+'</span>').join("")+'</div>'+
-          '<div class="record"><strong>PERSONAL RECORD</strong><br>'+escapeHtml(agent.record)+'<br><br><em>'+escapeHtml(agent.note)+'</em></div>'+
+            '<div class="metaBox"><div class="metaLabel">SPECIALIZATION</div><div class="metaValue">'+escapeHtml(agent.specialization)+'</div></div>'+ 
+            '<div class="metaBox"><div class="metaLabel">LAST SIGNIFICANT LOCATION</div><div class="metaValue">'+escapeHtml(agent.city)+'</div></div>'+ 
+          '</div>'+ 
+          '<div class="dossierText">'+escapeHtml(agent.profile)+'</div>'+ 
+          '<div class="authLabel">KNOWN FOR</div>'+ 
+          '<div class="known">'+agent.known.map(x=>'<span class="pill">'+escapeHtml(x)+'</span>').join("")+'</div>'+ 
           '<div class="secretMission">'+
-            '<div class="secretHead"><div class="secretTitle">SECRET MISSION</div><div class="secretStatus">'+(secretUnlocked?"UNLOCKED":"LOCKED")+'</div></div>'+
-            '<div class="secretIntro">'+(secretUnlocked?"Misi pribadi ini telah terbuka. Informasi di bawah ini hanya ditujukan untuk agent yang bersangkutan.":"Gunakan access word yang kamu terima setelah MISSION 01 untuk membuka misi pribadi ini.")+'</div>'+
+            '<div class="secretHead"><div class="secretTitle">SECRET MISSION</div><div class="secretStatus">'+(secretUnlocked?"UNLOCKED":"LOCKED")+'</div></div>'+ 
+            '<div class="secretIntro">'+(secretUnlocked?"Misi pribadi ini berisi objective dan progress kamu. Informasi lain disimpan di PERSONAL RECORD.":"Gunakan access word yang kamu terima setelah MISSION 01 untuk membuka misi pribadi ini.")+'</div>'+ 
             secretHtml+
-          '</div>'+
+          '</div>'+ 
+          '<div class="recordSection">'+
+            '<div class="recordSectionTitle">PERSONAL RECORD</div>'+ 
+            '<div class="recordBlockText">'+escapeHtml(agent.record)+'</div>'+ 
+            '<div class="recordBlock"><div class="recordBlockTitle">NOTE</div><div class="recordBlockText"><em>'+escapeHtml(agent.note)+'</em></div></div>'+ 
+            (secretUnlocked ?
+              '<div class="recordBlock"><div class="recordBlockTitle">'+escapeHtml(agent.secret.memoryTitle)+'</div><div class="recordBlockText">'+escapeHtml(agent.secret.memory)+'</div></div>'+ 
+              '<div class="recordBlock"><div class="recordBlockTitle">DEVELOPMENT</div><div class="recordBlockText">'+escapeHtml(agent.secret.development)+'</div></div>'
+              : '')+
+          '</div>'+ 
           '<div class="dossierActions">'+
-            '<button class="primary" id="enterMission" type="button">ENTER MISSION CONTROL</button>'+
-            '<button class="secondary" id="backToAccess" type="button">RETURN TO ACCESS</button>'+
-          '</div>'+
-        '</div>'+
+            '<button class="primary" id="enterMission" type="button">ENTER MISSION CONTROL</button>'+ 
+            '<button class="secondary" id="backToAccess" type="button">RETURN TO ACCESS</button>'+ 
+          '</div>'+ 
+        '</div>'+ 
       '</div>';
 
     document.getElementById("enterMission").addEventListener("click",()=>showScreen(game));
     document.getElementById("backToAccess").addEventListener("click",()=>showScreen(intro));
 
-    if(secretUnlocked){
+    if(secretUnlocked && agent.id==="architect"){
+      const data=getArchitectPredictions(agent);
+      const count=document.getElementById("architectProgressCount");
+      const bar=document.getElementById("architectProgressBar");
+      const update=()=>{
+        document.querySelectorAll(".architectPrediction").forEach(el=>{
+          const i=Number(el.dataset.index), field=el.dataset.field;
+          data[i][field]=el.value;
+        });
+        setArchitectPredictions(agent,data);
+        const correct=architectCorrectCount(data);
+        count.textContent=correct+" / "+ARCHITECT_TARGET;
+        bar.style.width=Math.min(100,correct/ARCHITECT_TARGET*100)+"%";
+      };
+      document.querySelectorAll(".architectPrediction").forEach(el=>el.addEventListener("input",update));
+      document.getElementById("saveArchitectProgress").addEventListener("click",update);
+    }else if(secretUnlocked && agent.id==="hunter"){
+      const data=getHunterGuesses(agent);
+      const count=document.getElementById("hunterProgressCount");
+      const bar=document.getElementById("hunterProgressBar");
+      const update=()=>{
+        document.querySelectorAll(".hunterField").forEach(el=>{
+          const i=Number(el.dataset.index), field=el.dataset.field;
+          data[i][field]=el.value;
+        });
+        document.querySelectorAll(".hunterCorrect").forEach(el=>{
+          data[Number(el.dataset.index)].correct=el.checked;
+        });
+        setHunterGuesses(agent,data);
+        const correct=hunterCorrectCount(data);
+        count.textContent=correct+" / "+HUNTER_TARGET;
+        bar.style.width=Math.min(100,correct/HUNTER_TARGET*100)+"%";
+      };
+      document.querySelectorAll(".hunterField,.hunterCorrect").forEach(el=>el.addEventListener("input",update));
+      document.querySelectorAll(".hunterCorrect").forEach(el=>el.addEventListener("change",update));
+      document.getElementById("saveHunterProgress").addEventListener("click",update);
+    }else if(secretUnlocked){
+      const cfg=SECRET_PROGRESS[agent.id];
       const input=document.getElementById("secretProgressInput");
       const btn=document.getElementById("saveSecretProgress");
       const count=document.getElementById("secretProgressCount");
       const bar=document.getElementById("secretProgressBar");
-
       const save=()=>{
         const v=setSecretProgress(agent,input.value);
         input.value=v;
         count.textContent=v+" / "+cfg.target;
         bar.style.width=(v/cfg.target*100)+"%";
       };
-
       input.addEventListener("change",save);
       input.addEventListener("keydown",e=>{if(e.key==="Enter")save();});
       btn.addEventListener("click",save);
@@ -389,7 +574,6 @@ color:#050607;font-size:10px;font-weight:950;letter-spacing:.16em}.authMsg{font-
       const input=document.getElementById("secretCode");
       const btn=document.getElementById("secretBtn");
       const msg=document.getElementById("secretMsg");
-
       input.addEventListener("input",()=>input.value=input.value.replace(/[^a-z0-9]/gi,"").toUpperCase());
       input.addEventListener("keydown",e=>{if(e.key==="Enter")unlockSecret(agent,input,msg);});
       btn.addEventListener("click",()=>unlockSecret(agent,input,msg));
