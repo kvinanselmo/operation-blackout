@@ -390,6 +390,27 @@ body{width:100%;min-width:0;overflow-x:hidden;}
   function hunterProgressKey(agent){return "blackout_hunter_guesses_"+agent.id;}
   function fragmentProgressKey(agent){return "blackout_fragments_"+agent.id;}
   function finalProgressKey(agent){return "blackout_final_unlocked_"+agent.id;}
+  const DEVICE_AGENT_KEY="blackout_device_agent";
+
+  function getBoundDeviceAgent(){
+    try{return localStorage.getItem(DEVICE_AGENT_KEY)||"";}catch(e){return "";}
+  }
+
+  function bindDeviceToAgent(agent){
+    try{localStorage.setItem(DEVICE_AGENT_KEY,agent.id);return true;}catch(e){return false;}
+  }
+
+  function getAgentById(id){
+    return AGENTS.find(a=>a.id===id)||null;
+  }
+
+  function getDeviceLockMessage(){
+    const boundId=getBoundDeviceAgent();
+    const boundAgent=getAgentById(boundId);
+    return boundAgent
+      ? "ACCESS DENIED — THIS DEVICE IS ALREADY ASSIGNED TO ANOTHER AGENT."
+      : "ACCESS DENIED — THIS DEVICE CANNOT ACCESS THAT AGENT.";
+  }
 
   function getMissionControlState(agent){
     const state=Array(6).fill(false);
@@ -525,6 +546,20 @@ body{width:100%;min-width:0;overflow-x:hidden;}
       cityCodeInput.classList.add("shake");
       return;
     }
+
+    const boundId=getBoundDeviceAgent();
+    if(boundId && boundId!==agent.id){
+      cityCodeMsg.textContent=getDeviceLockMessage();
+      cityCodeInput.classList.remove("shake");
+      void cityCodeInput.offsetWidth;
+      cityCodeInput.classList.add("shake");
+      return;
+    }
+
+    if(!boundId){
+      bindDeviceToAgent(agent);
+    }
+
     cityCodeMsg.textContent="";
     cityCodeInput.blur();
     currentAgent=agent;
