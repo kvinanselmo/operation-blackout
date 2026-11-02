@@ -368,7 +368,8 @@ body{width:100%;min-width:0;overflow-x:hidden;}
   const intro=document.getElementById("intro"), agentPage=document.getElementById("agentPage"), game=document.getElementById("game");
   const missions=document.getElementById("missions"), panel=document.getElementById("panel"), agentDossier=document.getElementById("agentDossier");
   const cityCodeInput=document.getElementById("cityCodeInput"), cityCodeBtn=document.getElementById("cityCodeBtn"), cityCodeMsg=document.getElementById("cityCodeMsg");
-  const accepted=Array(6).fill(false);
+  let accepted=Array(6).fill(false);
+  let finalUnlocked=false;
   const agentSecretUnlocked=new Set();
   const SECRET_PROGRESS={
     lucky:{target:10,label:'"HOKI BANGET GUE" DIUCAPKAN',hint:'Hitung setiap ucapan yang terdengar natural sepanjang permainan.'},
@@ -387,6 +388,39 @@ body{width:100%;min-width:0;overflow-x:hidden;}
   function secretProgressKey(agent){return "blackout_secret_progress_"+agent.id;}
   function architectProgressKey(agent){return "blackout_architect_predictions_"+agent.id;}
   function hunterProgressKey(agent){return "blackout_hunter_guesses_"+agent.id;}
+  function fragmentProgressKey(agent){return "blackout_fragments_"+agent.id;}
+  function finalProgressKey(agent){return "blackout_final_unlocked_"+agent.id;}
+
+  function getMissionControlState(agent){
+    const state=Array(6).fill(false);
+    if(!agent)return state;
+    try{
+      const raw=JSON.parse(localStorage.getItem(fragmentProgressKey(agent))||"null");
+      if(Array.isArray(raw)){
+        raw.slice(0,6).forEach((value,i)=>{
+          state[i]=String(value||"").toUpperCase()===EXPECTED[i];
+        });
+      }
+    }catch(e){}
+    return state;
+  }
+
+  function saveMissionControlState(agent){
+    if(!agent)return;
+    try{
+      const fragments=accepted.map((ok,i)=>ok?EXPECTED[i]:"");
+      localStorage.setItem(fragmentProgressKey(agent),JSON.stringify(fragments));
+      localStorage.setItem(finalProgressKey(agent),finalUnlocked?"1":"0");
+    }catch(e){}
+  }
+
+  function loadMissionControlState(agent){
+    accepted=getMissionControlState(agent);
+    finalUnlocked=false;
+    if(agent){
+      try{finalUnlocked=localStorage.getItem(finalProgressKey(agent))==="1";}catch(e){}
+    }
+  }
 
   function isSecretUnlocked(agent){
     if(agentSecretUnlocked.has(agent.id)) return true;
@@ -636,7 +670,7 @@ body{width:100%;min-width:0;overflow-x:hidden;}
       document.getElementById("resetSecretMission").addEventListener("click",()=>resetSecretMission(agent));
     }
 
-    document.getElementById("enterMission").addEventListener("click",()=>showScreen(game));
+    document.getElementById("enterMission").addEventListener("click",()=>openMissionControl(agent));
     document.getElementById("backToAccess").addEventListener("click",()=>showScreen(intro));
 
     if(secretUnlocked && agent.id==="architect"){
@@ -734,53 +768,145 @@ body{width:100%;min-width:0;overflow-x:hidden;}
     if(currentAgent) showAgentPage(currentAgent);
     else showScreen(intro);
   });
+  function openMissionControl(agent){
+    currentAgent=agent;
+    loadMissionControlState(agent);
+    showScreen(game);
+    buildGames();
+  }
+
+  function renderMissionControlState(){
+    const count=accepted.filter(Boolean).length;
+    document.getElementById("progressText").textContent=count+" / 6";
+    document.getElementById("bar").style.width=(count/6*100)+"%";
+
+    const finalInput=document.getElementById("finalInput");
+    const unlockBtn=document.getElementById("unlockBtn");
+    if(finalUnlocked){
+      finalInput.value=FINAL_CODE;
+      finalInput.disabled=true;
+      unlockBtn.disabled=true;
+      document.getElementById("status").textContent="ACCESS GRANTED";
+      document.getElementById("status").style.color="var(--green)";
+      document.getElementById("terminalStatus").textContent="VERIFIED";
+      document.getElementById("terminalStatus").className="terminalStatus good";
+      document.getElementById("message").textContent="THE SIX FRAGMENTS BECAME ONE.";
+      document.getElementById("message").style.color="var(--green)";
+      document.getElementById("vicon").textContent="🔓";
+      document.getElementById("vstate").textContent="VAULT OPEN";
+      document.getElementById("vstate").style.color="var(--green)";
+      document.getElementById("vsub").textContent="ACCESS CODE ACCEPTED.";
+      return;
+    }
+
+    finalInput.value="";
+    finalInput.disabled=count!==6;
+    unlockBtn.disabled=count!==6;
+    if(count===6){
+      document.getElementById("terminalStatus").textContent="READY";
+      document.getElementById("terminalStatus").className="terminalStatus good";
+      document.getElementById("message").textContent="All fragments verified. Find the correct order.";
+      document.getElementById("message").style.color="var(--green)";
+      document.getElementById("vsub").textContent="THE FINAL TERMINAL IS NOW ACTIVE.";
+    }else{
+      document.getElementById("terminalStatus").textContent="LOCKED";
+      document.getElementById("terminalStatus").className="terminalStatus";
+      document.getElementById("message").textContent="Complete all six games first.";
+      document.getElementById("message").style.color="var(--muted)";
+      document.getElementById("status").textContent="VAULT LOCKED";
+      document.getElementById("status").style.color="var(--muted)";
+      document.getElementById("vicon").textContent="🔒";
+      document.getElementById("vstate").textContent="VAULT LOCKED";
+      document.getElementById("vstate").style.color="var(--text)";
+      document.getElementById("vsub").textContent="Six games. Six fragments. One final answer.";
+    }
+  }
+
   function buildGames(){
+    if(currentAgent)loadMissionControlState(currentAgent);
     missions.innerHTML="";
     GAME_NAMES.forEach((name,i)=>{
       const card=document.createElement("div");card.className="mission";
+      const verified=Boolean(accepted[i]);
       card.innerHTML='<div><div class="mnum">MISSION '+String(i+1).padStart(2,"0")+'</div><div class="mnote">'+escapeHtml(GAME_NOTES[i])+'</div>'+
-      '<div class="inputRow"><input class="fragmentInput" maxlength="1" autocomplete="off" spellcheck="false" aria-label="Code fragment for Mission '+(i+1)+'">'+
-      '<button class="submit" type="button">SUBMIT</button></div></div><div class="mstatus">AWAITING FRAGMENT</div>';
+      '<div class="inputRow"><input class="fragmentInput" maxlength="1" autocomplete="off" spellcheck="false" aria-label="Code fragment for Mission '+(i+1)+'" value="'+(verified?EXPECTED[i]:"")+'">'+
+      '<button class="submit" type="button">'+(verified?"VERIFIED":"SUBMIT")+'</button></div></div><div class="mstatus">'+(verified?'FRAGMENT VERIFIED':'AWAITING FRAGMENT')+'</div>';
       const input=card.querySelector(".fragmentInput"),button=card.querySelector(".submit");
+      if(verified){
+        card.classList.add("accepted");
+        input.disabled=true;
+        button.disabled=true;
+        card.querySelector(".mstatus").className="mstatus good";
+      }
       input.addEventListener("input",()=>input.value=input.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,1));
       input.addEventListener("keydown",e=>{if(e.key==="Enter")submitFragment(i,card,input,button);});
-      button.addEventListener("click",()=>submitFragment(i,card,input,button));missions.appendChild(card);
+      button.addEventListener("click",()=>submitFragment(i,card,input,button));
+      missions.appendChild(card);
     });
+    renderMissionControlState();
   }
+
   function submitFragment(i,card,input,button){
-    if(accepted[i])return;const value=input.value.toUpperCase();
+    if(accepted[i])return;
+    const value=input.value.toUpperCase();
     if(value.length!==1){card.querySelector(".mstatus").textContent="ENTER 1 CHARACTER";return;}
-    if(value===EXPECTED[i]){accepted[i]=true;card.classList.add("accepted");input.disabled=true;button.disabled=true;button.textContent="VERIFIED";
-    const st=card.querySelector(".mstatus");st.textContent="FRAGMENT VERIFIED";st.className="mstatus good";updateProgress();}
-    else{const st=card.querySelector(".mstatus");st.textContent="ACCESS DENIED — CHECK YOUR RESULT";panel.classList.remove("shake");void panel.offsetWidth;panel.classList.add("shake");}
+    if(value===EXPECTED[i]){
+      accepted[i]=true;
+      saveMissionControlState(currentAgent);
+      card.classList.add("accepted");
+      input.disabled=true;
+      button.disabled=true;
+      button.textContent="VERIFIED";
+      const st=card.querySelector(".mstatus");
+      st.textContent="FRAGMENT VERIFIED";
+      st.className="mstatus good";
+      updateProgress();
+    }else{
+      const st=card.querySelector(".mstatus");
+      st.textContent="ACCESS DENIED — CHECK YOUR RESULT";
+      panel.classList.remove("shake");
+      void panel.offsetWidth;
+      panel.classList.add("shake");
+    }
   }
+
   function updateProgress(){
-    const count=accepted.filter(Boolean).length;document.getElementById("progressText").textContent=count+" / 6";
-    document.getElementById("bar").style.width=(count/6*100)+"%";
-    if(count===6){document.getElementById("finalInput").disabled=false;document.getElementById("unlockBtn").disabled=false;
-    document.getElementById("terminalStatus").textContent="READY";document.getElementById("terminalStatus").className="terminalStatus good";
-    document.getElementById("message").textContent="All fragments verified. Find the correct order.";document.getElementById("message").style.color="var(--green)";
-    document.getElementById("vsub").textContent="THE FINAL TERMINAL IS NOW ACTIVE.";document.getElementById("finalInput").focus();}
+    renderMissionControlState();
+    if(accepted.filter(Boolean).length===6 && !finalUnlocked){
+      document.getElementById("finalInput").focus();
+    }
   }
+
   function verifyFinal(){
-    const finalInput=document.getElementById("finalInput"),value=finalInput.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,6);finalInput.value=value;
+    const finalInput=document.getElementById("finalInput"),value=finalInput.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,6);
+    finalInput.value=value;
     if(accepted.filter(Boolean).length<6)return;
-    if(value===FINAL_CODE){document.getElementById("status").textContent="ACCESS GRANTED";document.getElementById("status").style.color="var(--green)";
-    document.getElementById("terminalStatus").textContent="VERIFIED";finalInput.disabled=true;document.getElementById("unlockBtn").disabled=true;
-    document.getElementById("message").textContent="THE SIX FRAGMENTS BECAME ONE.";document.getElementById("message").style.color="var(--green)";
-    document.getElementById("vicon").textContent="🔓";document.getElementById("vstate").textContent="VAULT OPEN";document.getElementById("vstate").style.color="var(--green)";
-    document.getElementById("vsub").textContent="ACCESS CODE ACCEPTED.";panel.classList.remove("flash");void panel.offsetWidth;panel.classList.add("flash");}
-    else{document.getElementById("message").textContent="ACCESS DENIED — WRONG ORDER.";document.getElementById("message").style.color="var(--red)";
-    panel.classList.remove("shake");void panel.offsetWidth;panel.classList.add("shake");}
+    if(value===FINAL_CODE){
+      finalUnlocked=true;
+      saveMissionControlState(currentAgent);
+      renderMissionControlState();
+      panel.classList.remove("flash");
+      void panel.offsetWidth;
+      panel.classList.add("flash");
+    }else{
+      document.getElementById("message").textContent="ACCESS DENIED — WRONG ORDER.";
+      document.getElementById("message").style.color="var(--red)";
+      panel.classList.remove("shake");
+      void panel.offsetWidth;
+      panel.classList.add("shake");
+    }
   }
+
   function resetAll(){
-    accepted.fill(false);document.getElementById("status").textContent="VAULT LOCKED";document.getElementById("status").style.color="var(--muted)";
-    const finalInput=document.getElementById("finalInput");finalInput.value="";finalInput.disabled=true;document.getElementById("unlockBtn").disabled=true;
-    document.getElementById("terminalStatus").textContent="LOCKED";document.getElementById("terminalStatus").className="terminalStatus";
-    document.getElementById("message").textContent="Complete all six games first.";document.getElementById("message").style.color="var(--muted)";
-    document.getElementById("vicon").textContent="🔒";document.getElementById("vstate").textContent="VAULT LOCKED";document.getElementById("vstate").style.color="var(--text)";
-    document.getElementById("vsub").textContent="Six games. Six fragments. One final answer.";document.getElementById("progressText").textContent="0 / 6";
-    document.getElementById("bar").style.width="0%";buildGames();
+    accepted=Array(6).fill(false);
+    finalUnlocked=false;
+    if(currentAgent){
+      try{
+        localStorage.removeItem(fragmentProgressKey(currentAgent));
+        localStorage.removeItem(finalProgressKey(currentAgent));
+      }catch(e){}
+    }
+    buildGames();
   }
   function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
   document.getElementById("finalInput").addEventListener("input",e=>e.target.value=e.target.value.replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,6));
